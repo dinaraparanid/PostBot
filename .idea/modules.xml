@@ -3,7 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/TgPostBot.iml" filepath="$PROJECT_DIR$/.idea/modules/TgPostBot.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TgPostBot-build.iml" filepath="$PROJECT_DIR$/.idea/modules/TgPostBot-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TgPostBot.TgPostBot-build.iml" filepath="$PROJECT_DIR$/.idea/modules/TgPostBot.TgPostBot-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/.idea/modules/core.core-build.iml" filepath="$PROJECT_DIR$/core/.idea/modules/core.core-build.iml" />
     </modules>
   </component>
 </project>

@@ -1,6 +1,7 @@
 package com.paranid5.tgpostbot
-package domain
+package bot
 
+import bot.commands.{ICommand, commands}
 import utils.waitForEternity
 
 import cats.effect.IO
@@ -38,12 +39,19 @@ def launchPostBot(token: String): IO[Unit] =
         yield ()
       .start
 
-    _ ← launchBotEventLoop(messageQueue).start
+    _ ← launchBotEventLoop(bot, messageQueue, commands).start
   yield ()
 
-private def launchBotEventLoop(messageQueue: Queue[IO, Message]): IO[Unit] =
+private def launchBotEventLoop[R](
+  bot:          TelegramBot,
+  messageQueue: Queue[IO, Message],
+  commands:     List[ICommand[_, R]]
+): IO[Unit] =
   def impl(): IO[Unit] =
-    for message ← messageQueue.take
-      yield println(message.text())
+    for
+      message ← messageQueue.take
+      text = message.text()
+      command = commands find (_ ? text)
+    yield command foreach (_.execute(bot, message))
 
   impl().foreverM

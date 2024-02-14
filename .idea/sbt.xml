@@ -13,6 +13,15 @@
         </option>
         <option name="sbtVersion" value="1.9.8" />
       </SbtProjectSettings>
+      <SbtProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/core" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/core" />
+          </set>
+        </option>
+        <option name="sbtVersion" value="1.9.8" />
+      </SbtProjectSettings>
     </option>
   </component>
 </project>
