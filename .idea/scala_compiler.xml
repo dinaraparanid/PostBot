@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="sbt 1" modules="TgPostBot,core" />
+    <profile name="sbt 1" modules="TgPostBot,TgPostBot.core,TgPostBot.data,core,data,data.core" />
   </component>
 </project>

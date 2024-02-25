@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TgPostBot.iml" filepath="$PROJECT_DIR$/.idea/modules/TgPostBot.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TgPostBot.TgPostBot-build.iml" filepath="$PROJECT_DIR$/.idea/modules/TgPostBot.TgPostBot-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TgPostBot.core.iml" filepath="$PROJECT_DIR$/.idea/modules/TgPostBot.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TgPostBot.data.iml" filepath="$PROJECT_DIR$/.idea/modules/TgPostBot.data.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/.idea/modules/core.core-build.iml" filepath="$PROJECT_DIR$/core/.idea/modules/core.core-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/.idea/modules/core.core-build~1.iml" filepath="$PROJECT_DIR$/core/.idea/modules/core.core-build~1.iml" />
     </modules>
   </component>
 </project>

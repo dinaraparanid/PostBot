@@ -12,19 +12,15 @@ import com.pengrad.telegrambot.response.SendResponse
 
 import scala.annotation.targetName
 
-class StartCommand
+private val Title: String = "/start"
 
-object StartCommand:
-  private def Title: String = "/start"
+class StartCommand extends BotCommand[SendResponse]:
+  @targetName("matches")
+  override def ? (text: String): Boolean =
+    text == Title
 
-  given startCommand: BotCommand[StartCommand, SendResponse] with
-    extension (c: StartCommand)
-      @targetName("matches")
-      def ? (text: String): Boolean =
-        text == Title
-
-      def execute(bot: TelegramBot, message: Message): SendResponse =
-        sendStartCommand(bot, message.chatId)
+  override def execute(bot: TelegramBot, message: Message): SendResponse =
+    sendStartCommand(bot, message.chatId)
 
 private def sendStartCommand(
   bot:    TelegramBot,

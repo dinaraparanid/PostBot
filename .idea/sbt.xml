@@ -8,6 +8,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/project" />
           </set>
         </option>
@@ -20,7 +22,16 @@
             <option value="$PROJECT_DIR$/core" />
           </set>
         </option>
-        <option name="sbtVersion" value="1.9.8" />
+        <option name="sbtVersion" value="1.9.7" />
+      </SbtProjectSettings>
+      <SbtProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/data" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/data" />
+          </set>
+        </option>
+        <option name="sbtVersion" value="1.9.7" />
       </SbtProjectSettings>
     </option>
   </component>

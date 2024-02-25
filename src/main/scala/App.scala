@@ -1,7 +1,7 @@
 package com.paranid5.tgpostbot
 
-import config.botToken
 import bot.launchPostBot
+import config.botToken
 import utils.waitForEternity
 
 import cats.effect.{IO, IOApp}

@@ -1,5 +1,5 @@
 package com.paranid5.tgpostbot
-package bot.commands.help
+package bot.commands.store
 
 import bot.commands.BotCommand
 import utils.telegram.chatId
@@ -11,18 +11,19 @@ import com.pengrad.telegrambot.response.SendResponse
 
 import scala.annotation.targetName
 
-private val Title: String = "/help"
+private val Title = "/store"
 
-class HelpCommand extends BotCommand[SendResponse]:
+class StoreCommand extends BotCommand[SendResponse]:
   @targetName("matches")
   override def ? (text: String): Boolean =
     text == Title
 
   override def execute(bot: TelegramBot, message: Message): SendResponse =
-    sendHelpCommand(bot, message.chatId)
-
-private def sendHelpCommand(
-  bot:    TelegramBot,
+    sendRequestPost(bot, message.chatId)
+    
+private def sendRequestPost(
+  bot: TelegramBot,
   chatId: Long
 ): SendResponse =
-  bot execute SendMessage(chatId, helpCommandText)
+  bot execute:
+    SendMessage(chatId, requestPostText)
