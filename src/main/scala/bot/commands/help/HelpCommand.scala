@@ -9,17 +9,12 @@ import com.pengrad.telegrambot.model.Message
 import com.pengrad.telegrambot.request.SendMessage
 import com.pengrad.telegrambot.response.SendResponse
 
-import scala.annotation.targetName
+final class HelpCommand
 
-private val Title: String = "/help"
-
-class HelpCommand extends BotCommand[SendResponse]:
-  @targetName("matches")
-  override def ? (text: String): Boolean =
-    text == Title
-
-  override def execute(bot: TelegramBot, message: Message): SendResponse =
-    sendHelpCommand(bot, message.chatId)
+object HelpCommand:
+  given helpHandler: BotCommand[HelpCommand, SendResponse] with
+    override def execute(bot: TelegramBot, message: Message): SendResponse =
+      sendHelpCommand(bot, message.chatId)
 
 private def sendHelpCommand(
   bot:    TelegramBot,

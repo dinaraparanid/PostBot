@@ -6,8 +6,5 @@ import com.pengrad.telegrambot.model.Message
 
 import scala.annotation.targetName
 
-trait BotCommand[+R]:
-  @targetName("matches")
-  def ? (text: String): Boolean
-
+trait BotCommand[-T, +R]:
   def execute(bot: TelegramBot, message: Message): R

@@ -1,12 +1,14 @@
 package com.paranid5.tgpostbot
 package bot
 
-import bot.commands.{BotCommand, commands}
+import bot.commands.handleCommand
 import utils.waitForEternity
 
 import cats.effect.IO
 import cats.effect.std.{Dispatcher, Queue}
+
 import com.pengrad.telegrambot.model.Message
+import com.pengrad.telegrambot.response.SendResponse
 import com.pengrad.telegrambot.{TelegramBot, UpdatesListener}
 
 import scala.jdk.CollectionConverters.given
@@ -38,19 +40,17 @@ def launchPostBot(token: String): IO[Unit] =
         yield ()
       .start
 
-    _ ← launchBotEventLoop(bot, messageQueue, commands).start
+    _ ← launchBotEventLoop(bot, messageQueue).start
   yield ()
 
 private def launchBotEventLoop(
   bot:          TelegramBot,
   messageQueue: Queue[IO, Message],
-  commands:     List[BotCommand[_]]
 ): IO[Unit] =
-  def impl(): IO[Unit] =
+  def impl(): IO[SendResponse] =
     for
       message ← messageQueue.take
-      text = message.text()
-      command = commands find (_ ? text)
-    yield command foreach (_.execute(bot, message))
+      _ = println(message)
+    yield handleCommand(bot, message)
 
   impl().foreverM

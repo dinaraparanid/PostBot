@@ -10,17 +10,12 @@ import com.pengrad.telegrambot.model.request.ParseMode
 import com.pengrad.telegrambot.request.SendMessage
 import com.pengrad.telegrambot.response.SendResponse
 
-import scala.annotation.targetName
+final class StartCommand
 
-private val Title: String = "/start"
-
-class StartCommand extends BotCommand[SendResponse]:
-  @targetName("matches")
-  override def ? (text: String): Boolean =
-    text == Title
-
-  override def execute(bot: TelegramBot, message: Message): SendResponse =
-    sendStartCommand(bot, message.chatId)
+object StartCommand:
+  given startHandler: BotCommand[StartCommand, SendResponse] with
+    override def execute(bot: TelegramBot, message: Message): SendResponse =
+      sendStartCommand(bot, message.chatId)
 
 private def sendStartCommand(
   bot:    TelegramBot,

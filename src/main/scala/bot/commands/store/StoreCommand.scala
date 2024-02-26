@@ -9,21 +9,16 @@ import com.pengrad.telegrambot.model.Message
 import com.pengrad.telegrambot.request.SendMessage
 import com.pengrad.telegrambot.response.SendResponse
 
-import scala.annotation.targetName
+final class StoreCommand
 
-private val Title = "/store"
-
-class StoreCommand extends BotCommand[SendResponse]:
-  @targetName("matches")
-  override def ? (text: String): Boolean =
-    text == Title
-
-  override def execute(bot: TelegramBot, message: Message): SendResponse =
-    sendRequestPost(bot, message.chatId)
+object StoreCommand:
+  given storeHandler: BotCommand[StoreCommand, SendResponse] with
+    override def execute(bot: TelegramBot, message: Message): SendResponse =
+      sendRequestPost(bot, message.chatId)
     
 private def sendRequestPost(
   bot: TelegramBot,
   chatId: Long
 ): SendResponse =
-  bot execute:
+  bot execute
     SendMessage(chatId, requestPostText)
