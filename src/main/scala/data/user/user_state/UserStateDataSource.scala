@@ -3,10 +3,12 @@ package data.user.user_state
 
 import core.common.entities.user.{UserId, UserState}
 
-import monix.eval.Task
-import monix.reactive.Observable
+import cats.effect.IO
+import cats.effect.std.Queue
 
 trait UserStateDataSource[S]:
-  def userStatesSource: Observable[Map[UserId, UserState]]
+  def startStatesMonitoring: IO[S]
 
-  def patchUserState(userState: UserState): Task[Unit]
+  def userStateSource(src: S, id: UserId): IO[UserState]
+
+  def patchUserState(src: S, userState: UserState): IO[Unit]

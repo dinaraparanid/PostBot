@@ -2,6 +2,7 @@ package com.paranid5.tgpostbot
 package bot
 
 import bot.commands.handleCommand
+import data.user.user_state.RedisUserStateDataSource.redisDataSource
 import utils.waitForEternity
 
 import cats.effect.IO
@@ -40,6 +41,8 @@ def launchPostBot(token: String): IO[Unit] =
         yield ()
       .start
 
+    userStatesDataSource ← redisDataSource.startStatesMonitoring
+
     _ ← launchBotEventLoop(bot, messageQueue).start
   yield ()
 
@@ -48,9 +51,7 @@ private def launchBotEventLoop(
   messageQueue: Queue[IO, Message],
 ): IO[Unit] =
   def impl(): IO[SendResponse] =
-    for
-      message ← messageQueue.take
-      _ = println(message)
-    yield handleCommand(bot, message)
+    for message ← messageQueue.take
+      yield handleCommand(bot, message)
 
   impl().foreverM

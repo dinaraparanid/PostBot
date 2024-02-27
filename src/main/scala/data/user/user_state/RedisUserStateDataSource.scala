@@ -8,7 +8,6 @@ import data.user.UserCodec.given
 import cats.effect.*
 import cats.effect.std.Queue
 import cats.implicits.*
-import cats.syntax.all.*
 
 import dev.profunktor.redis4cats.connection.RedisClient
 import dev.profunktor.redis4cats.data.{RedisChannel, RedisCodec}
@@ -22,7 +21,36 @@ import io.circe.syntax.*
 
 import scala.language.implicitConversions
 
-def run(
+final class RedisUserStateDataSource(
+  private val requestQueue:  Queue[IO, Request],
+  private val responseQueue: Queue[IO, UserState]
+)
+
+object RedisUserStateDataSource:
+  given redisDataSource: UserStateDataSource[RedisUserStateDataSource] with
+    override def startStatesMonitoring: IO[RedisUserStateDataSource] =
+      for
+        requestQueue  ← Queue.unbounded[IO, Request]
+        responseQueue ← Queue.unbounded[IO, UserState]
+        _             ← run(requestQueue, responseQueue).start
+      yield RedisUserStateDataSource(requestQueue, responseQueue)
+
+    override def userStateSource(
+      src: RedisUserStateDataSource,
+      id:  UserId
+    ): IO[UserState] =
+      for
+        _ ← src.requestQueue offer GetUserState(id)
+        state ← src.responseQueue.take
+      yield state
+
+    override def patchUserState(
+      src:       RedisUserStateDataSource,
+      userState: UserState
+    ): IO[Unit] =
+      src.requestQueue offer PatchUserState(userState)
+
+private def run(
   requestQueue:  Queue[IO, Request],
   responseQueue: Queue[IO, UserState]
 ): IO[Unit] =
@@ -47,7 +75,7 @@ private def processMessages(
     for req ← requestQueue.take
       yield handleRequest(pubSub, req, responseQueue)
 
-  impl.foreverM.start.void
+  impl.foreverM
 
 private def handleRequest(
   pubSub:        PubSubCommands[[A] =>> Stream[IO, A], String, String],
@@ -63,7 +91,6 @@ private def handleRequest(
       val id: UserId = userState.user.id
       val chan = userChannel(id)
       val pub = pubSub publish chan
-      val sub = pubSub subscribe chan
       patchUserState(pub, userState)
 
 private def sendUserState(
@@ -85,4 +112,3 @@ private def patchUserState(
     Stream eval (IO pure userState.asJson.noSpaces)
 
   impl through pub
-
