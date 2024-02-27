@@ -1,14 +1,13 @@
 package com.paranid5.tgpostbot
 package data.user.user_state
 
-import core.common.entities.user.{UserId, UserState}
+import core.common.entities.user.{User, UserState}
 
 import cats.effect.IO
-import cats.effect.std.Queue
 
 trait UserStateDataSource[S]:
-  def startStatesMonitoring: IO[S]
+  def launch: IO[S]
 
-  def userStateSource(src: S, id: UserId): IO[UserState]
-
-  def patchUserState(src: S, userState: UserState): IO[Unit]
+  extension(s: S)
+    def userStateSource(user: User): IO[UserState]
+    def patchUserState(userState: UserState): IO[Unit]

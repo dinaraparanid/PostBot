@@ -3,6 +3,7 @@ package bot
 
 import bot.commands.handleCommand
 import data.user.user_state.RedisUserStateDataSource.redisDataSource
+import data.user.user_state.UserStateDataSource
 import utils.waitForEternity
 
 import cats.effect.IO
@@ -41,17 +42,19 @@ def launchPostBot(token: String): IO[Unit] =
         yield ()
       .start
 
-    userStatesDataSource ← redisDataSource.startStatesMonitoring
-
-    _ ← launchBotEventLoop(bot, messageQueue).start
+    stateSource ← redisDataSource.launch
+    _           ← launchBotEventLoop(bot, messageQueue, stateSource).start
   yield ()
 
-private def launchBotEventLoop(
+private def launchBotEventLoop[S: UserStateDataSource](
   bot:          TelegramBot,
   messageQueue: Queue[IO, Message],
+  stateSource:  S
 ): IO[Unit] =
-  def impl(): IO[SendResponse] =
-    for message ← messageQueue.take
-      yield handleCommand(bot, message)
+  def impl: IO[SendResponse] =
+    for
+      message  ← messageQueue.take
+      response ← handleCommand(bot, message, stateSource)
+    yield response
 
-  impl().foreverM
+  impl.foreverM

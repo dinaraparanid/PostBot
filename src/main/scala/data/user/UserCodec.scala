@@ -12,49 +12,89 @@ object UserCodec:
   given Encoder[UserId] =
     Encoder.forProduct1("value")(_.value)
 
+  given Decoder[UserId] =
+    Decoder.forProduct1("value")(UserId.apply)
+
   given Encoder[User] =
     Encoder.forProduct4("id", "chatId", "firstName", "lastName"): u ⇒
       (u.id, u.chatId, u.firstName, u.lastName)
 
-  given Encoder[NoneState] =
-    Encoder.forProduct1("user")(_.user)
+  given Decoder[User] =
+    Decoder.forProduct4("id", "chatId", "firstName", "lastName")(User.apply)
 
-  given Encoder[StartSentState] =
-    Encoder.forProduct1("user")(_.user)
+  given Encoder[UserState.None] =
+    Encoder.forProduct2("None", "user"): s ⇒
+      ("None", s.user)
 
-  given Encoder[StoreSentState] =
-    Encoder.forProduct1("user")(_.user)
+  given Decoder[UserState.None] =
+    Decoder.forProduct2("None", "user"): (_: String, u: User) ⇒
+      UserState.None(u)
 
-  given Encoder[StorePostSentState] =
-    Encoder.forProduct1("user")(_.user)
+  given Encoder[UserState.StartSent] =
+    Encoder.forProduct2("StartSent", "user"): s ⇒
+      ("StartSent", s.user)
 
-  given Encoder[RemoveSentState] =
-    Encoder.forProduct1("user")(_.user)
+  given Decoder[UserState.StartSent] =
+    Decoder.forProduct2("StartSent", "user"): (_: String, u: User) ⇒
+      UserState.StartSent(u)
 
-  given Encoder[UpdateSentState] =
-    Encoder.forProduct1("user")(_.user)
+  given Encoder[UserState.StoreSent] =
+    Encoder.forProduct2("StoreSent", "user"): s ⇒
+      ("StoreSent", s.user)
 
-  given Encoder[HelpSentState] =
-    Encoder.forProduct1("user")(_.user)
+  given Decoder[UserState.StoreSent] =
+    Decoder.forProduct2("StoreSent", "user"): (_: String, u: User) ⇒
+      UserState.StoreSent(u)
+
+  given Encoder[UserState.StorePostSent] =
+    Encoder.forProduct2("StorePostSent", "user"): s ⇒
+      ("StorePostSent", s.user)
+
+  given Decoder[UserState.StorePostSent] =
+    Decoder.forProduct2("StorePostSent", "user"): (_: String, u: User) ⇒
+      UserState.StorePostSent(u)
+
+  given Encoder[UserState.RemoveSent] =
+    Encoder.forProduct2("RemoveSent", "user"): s ⇒
+      ("RemoveSent", s.user)
+
+  given Decoder[UserState.RemoveSent] =
+    Decoder.forProduct2("RemoveSent", "user"): (_: String, u: User) ⇒
+      UserState.RemoveSent(u)
+
+  given Encoder[UserState.UpdateSent] =
+    Encoder.forProduct2("UpdateSent", "user"): s ⇒
+      ("UpdateSent", s.user)
+
+  given Decoder[UserState.UpdateSent] =
+    Decoder.forProduct2("UpdateSent", "user"): (_: String, u: User) ⇒
+      UserState.UpdateSent(u)
+
+  given Encoder[UserState.HelpSent] =
+    Encoder.forProduct2("HelpSent", "user"): s ⇒
+      ("HelpSent", s.user)
+
+  given Decoder[UserState.HelpSent] =
+    Decoder.forProduct2("HelpSent", "user"): (_: String, u: User) ⇒
+      UserState.HelpSent(u)
 
   given Encoder[UserState] =
     Encoder.instance[UserState]:
-      case none @ NoneState(_) ⇒ none.asJson
-      case startSent @ StartSentState(_) ⇒ startSent.asJson
-      case storeSent @ StoreSentState(_) ⇒ storeSent.asJson
-      case storePostSent @ StorePostSentState(_) ⇒ storePostSent.asJson
-      case removeSent @ RemoveSentState(_) ⇒ removeSent.asJson
-      case updateSent @ UpdateSentState(_) ⇒ updateSent.asJson
-      case helpSent @ HelpSentState(_) ⇒ helpSent.asJson
+      case none          @ UserState.None(_)          ⇒ none.asJson
+      case startSent     @ UserState.StartSent(_)     ⇒ startSent.asJson
+      case storeSent     @ UserState.StoreSent(_)     ⇒ storeSent.asJson
+      case storePostSent @ UserState.StorePostSent(_) ⇒ storePostSent.asJson
+      case removeSent    @ UserState.RemoveSent(_)    ⇒ removeSent.asJson
+      case updateSent    @ UserState.UpdateSent(_)    ⇒ updateSent.asJson
+      case helpSent      @ UserState.HelpSent(_)      ⇒ helpSent.asJson
 
   given Decoder[UserState] =
     List[Decoder[UserState]](
-      Decoder[NoneState].widen,
-      Decoder[StartSentState].widen,
-      Decoder[StoreSentState].widen,
-      Decoder[StorePostSentState].widen,
-      Decoder[RemoveSentState].widen,
-      Decoder[UpdateSentState].widen,
-      Decoder[HelpSentState].widen
+      Decoder[UserState.None].widen,
+      Decoder[UserState.StartSent].widen,
+      Decoder[UserState.StoreSent].widen,
+      Decoder[UserState.StorePostSent].widen,
+      Decoder[UserState.RemoveSent].widen,
+      Decoder[UserState.UpdateSent].widen,
+      Decoder[UserState.HelpSent].widen
     ).reduceLeft(_ or _)
-
