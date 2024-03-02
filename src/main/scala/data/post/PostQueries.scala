@@ -3,18 +3,15 @@ package data.post
 
 import core.common.entities.post.Post
 
-import cats.effect.IO
-
 import doobie.*
 import doobie.implicits.*
-import doobie.util.transactor
 
-object PostgresPostDataSource:
+object PostQueries:
   def posts: ConnectionIO[List[Post]] =
-    sql"SELECT * FROM Post".query[Post].to[List]
+    sql"""SELECT * FROM "Post"""".query[Post].to[List]
 
-  def getPostsByUser(userId: Long): ConnectionIO[List[Post]] =
-    sql"SELECT * FROM Post WHERE user_id = $userId".query[Post].to[List]
+  def postsByUser(userId: Long): ConnectionIO[List[Post]] =
+    sql"""SELECT * FROM "Post" WHERE user_id = $userId""".query[Post].to[List]
 
   def storePost(
     userId: Long,
@@ -23,7 +20,7 @@ object PostgresPostDataSource:
     chatId: Long
   ): ConnectionIO[Long] =
     sql"""
-    INSERT INTO Post(user_id, date, text, chat_id)
+    INSERT INTO "Post" (user_id, date, text, chat_id)
     VALUES ($userId, $date, $text, $chatId)
     RETURNING id""".query[Long].unique
 
@@ -35,7 +32,7 @@ object PostgresPostDataSource:
     newChatId: Long
   ): ConnectionIO[Int] =
     sql"""
-    UPDATE Post SET
+    UPDATE "Post" SET
       user_id = $newUserId,
       date = $newDate,
       text = $newText,
@@ -43,4 +40,4 @@ object PostgresPostDataSource:
     WHERE id = $id""".update.run
 
   def deletePost(id: Long): ConnectionIO[Int] =
-    sql"DELETE FROM Post WHERE id = $id".update.run
+    sql"""DELETE FROM "Post" WHERE id = $id""".update.run

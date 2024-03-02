@@ -3,11 +3,9 @@ package data.post
 
 import core.common.entities.post.{MessageEntity, Post, PostWithEntities}
 import core.common.entities.user.User
-import data.user.PostgresUserDataSource
 
 import cats.effect.*
 import cats.implicits.*
-import cats.syntax.all.*
 
 import doobie.*
 import doobie.implicits.*
@@ -39,7 +37,7 @@ object PostgresTgPostsRepository:
       override def getPostsByUser(user: User): IO[List[PostWithEntities]] =
         def impl: ConnectionIO[List[PostWithEntities]] =
           for
-            posts ← PostgresPostDataSource getPostsByUser user.id
+            posts ← PostQueries postsByUser user.id
             args  ← posts.map(postArgs(user)).sequence
           yield args map { case (p, u, es) ⇒ new PostWithEntities(p, u, es) }
 
@@ -53,20 +51,20 @@ object PostgresTgPostsRepository:
         entities: List[MessageEntity]
       ): IO[Either[Throwable, Long]] =
         def tryStorePost(): ConnectionIO[Either[Throwable, Long]] =
-          PostgresPostDataSource
+          PostQueries
             .storePost(user.id, date, text, chatId)
             .attempt
 
         def impl: ConnectionIO[Either[Throwable, Long]] =
           for
-            _           ← PostgresUserDataSource storeOrUpdateUser user
+            _           ← UserQueries storeOrUpdateUser user
             postIdRes   ← tryStorePost()
-            entitiesRes ← postIdRes.map(addEntities(entities)).sequence
-          yield entitiesRes map (_.head)
+            entitiesRes ← postIdRes.map(MessageEntityQueries storeEntities entities).sequence
+          yield entitiesRes flatMap (_ ⇒ postIdRes)
 
         impl transact repository.transactor
 
-      def updatePost(
+      override def updatePost(
         id:          Long,
         newUser:     User,
         newChatId:   Long,
@@ -75,7 +73,7 @@ object PostgresTgPostsRepository:
         newEntities: List[MessageEntity]
       ): IO[Either[Throwable, Unit]] =
         def tryUpdatePost(): ConnectionIO[Either[Throwable, Int]] =
-          PostgresPostDataSource
+          PostQueries
             .updatePost(
               id        = id,
               newUserId = newUser.id,
@@ -87,7 +85,7 @@ object PostgresTgPostsRepository:
 
         def impl: ConnectionIO[Either[Throwable, Unit]] =
           for
-            updUserRes ← PostgresUserDataSource
+            updUserRes ← UserQueries
               .updateUser(newUser)
               .attempt
 
@@ -97,40 +95,18 @@ object PostgresTgPostsRepository:
 
             res ← updPostRes
               .flatten
-              .map(_ ⇒ updateEntities(newEntities, id))
+              .map(_ ⇒ MessageEntityQueries.updateEntities(newEntities, id))
               .sequence
           yield res
 
         impl transact repository.transactor
 
-      def removePost(id: Long): IO[Either[Throwable, Unit]] =
-        PostgresPostDataSource
+      override def removePost(id: Long): IO[Either[Throwable, Unit]] =
+        PostQueries
           .deletePost(id)
           .map(_ ⇒ ())
           .attempt
           .transact(repository.transactor)
 
 private def postArgs(user: User)(post: Post): ConnectionIO[(Post, User, List[MessageEntity])] =
-  (post, user, PostgresMessageEntityDataSource getMessageEntitiesByPost post.id).sequence
-
-private def addEntities(entities: List[MessageEntity])(postId: Long): ConnectionIO[List[Long]] =
-  entities
-    .map: entity ⇒
-      PostgresMessageEntityDataSource.storeMessageEntity(
-        entityType    = entity.entityType,
-        offset        = entity.offset,
-        length        = entity.length,
-        url           = entity.url,
-        customEmojiId = entity.customEmojiId,
-        postId        = postId
-      ).map(_ ⇒ postId)
-    .sequence
-
-private def updateEntities(
-  entities: List[MessageEntity],
-  postId:   Long
-): ConnectionIO[Unit] =
-  for
-    _ ← PostgresMessageEntityDataSource deleteMessageEntitiesByPost postId
-    _ ← addEntities(entities)(postId)
-  yield ()
+  (post, user, MessageEntityQueries entitiesByPost post.id).sequence

@@ -18,13 +18,18 @@ def onStorePostCommand[U: UserStateDataSource, R: TgPostsRepository](
   stateSource:     U,
   postsRepository: R
 ): IO[SendResponse] =
-  for _ ← patchUserStorePostSentState(message.botUser, stateSource)
-    yield storePostAndRespond(message, bot, postsRepository)
+  for
+    _   ← patchUserStorePostSentState(message.botUser, stateSource)
+    res ← storePostAndRespond(message, bot, postsRepository)
+  yield res
 
 private def storePostAndRespond[R: TgPostsRepository](
   message:         Message,
   bot:             TelegramBot,
   postsRepository: R
-): SendResponse =
-  println(message)
-  bot execute SendMessage(message.chatId, postReceivedText)
+): IO[SendResponse] =
+  for res ← postsRepository storePost message
+    yield res.fold(
+      fa = { e ⇒ bot execute SendMessage(message.chatId, e.getMessage) },
+      fb = { _ ⇒ bot execute SendMessage(message.chatId, postReceivedText) }
+    )

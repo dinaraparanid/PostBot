@@ -1,5 +1,5 @@
 package com.paranid5.tgpostbot
-package data.user
+package data.post
 
 import core.common.entities.user.User
 
@@ -7,12 +7,12 @@ import doobie.*
 import doobie.free.connection.ConnectionIO
 import doobie.implicits.*
 
-case object PostgresUserDataSource:
+case object UserQueries:
   def users: ConnectionIO[List[User]] =
-    sql"SELECT * FROM User".query[User].to[List]
+    sql"""SELECT * FROM "User"""".query[User].to[List]
 
-  def getUserById(id: Long): ConnectionIO[Option[User]] =
-    sql"SELECT * FROM User WHERE id = $id".query[User].option
+  def userById(id: Long): ConnectionIO[Option[User]] =
+    sql"""SELECT * FROM "User" WHERE id = $id""".query[User].option
 
   def storeOrUpdateUser(
     id:        Long,
@@ -22,11 +22,11 @@ case object PostgresUserDataSource:
     lastName:  Option[String]
   ): ConnectionIO[Int] =
     sql"""
-    INSERT INTO User(id, first_name, last_name, username, chat_id)
-    VALUES ($id, ${firstName.orNull}, ${lastName.orNull}, $userName, $chatId)
+    INSERT INTO "User" (id, first_name, last_name, username, chat_id)
+    VALUES ($id, $firstName, $lastName, $userName, $chatId)
     ON CONFLICT (id) DO UPDATE
-    SET first_name = ${firstName.orNull},
-        last_name = ${lastName.orNull}
+    SET first_name = $firstName,
+        last_name = $lastName,
         username = $userName,
         chat_id  = $chatId""".update.run
 
@@ -47,11 +47,11 @@ case object PostgresUserDataSource:
     newLastName:  Option[String]
   ): ConnectionIO[Int] =
     sql"""
-    UPDATE User SET
+    UPDATE "User" SET
       chat_id = $newChatId,
       username = $newUserName,
-      first_name = ${newFirstName.orNull},
-      last_name = ${newLastName.orNull}
+      first_name = $newFirstName,
+      last_name = $newLastName
     WHERE id = $id""".update.run
 
   def updateUser(user: User): ConnectionIO[Int] =
@@ -64,4 +64,4 @@ case object PostgresUserDataSource:
     )
 
   def deleteUser(id: Long): ConnectionIO[Int] =
-    sql"DELETE FROM User WHERE id = $id".update.run
+    sql"""DELETE FROM "User" WHERE id = $id""".update.run
