@@ -19,10 +19,11 @@ import io.github.cdimascio.dotenv.Dotenv
 
 import scala.jdk.CollectionConverters.given
 
-def launchPostBot(token: String): IO[Unit] =
-  val bot = TelegramBot(token)
+private val BotToken = "BOT_TOKEN"
 
+def launchPostBot(): IO[Unit] =
   def impl(dotenv: Dotenv): IO[Unit] =
+    val bot = TelegramBot(dotenv get BotToken)
     val postRepository = postgresTgPostRepository connect dotenv
 
     for

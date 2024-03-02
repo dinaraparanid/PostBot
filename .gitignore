@@ -1,5 +1,4 @@
 target
-src/main/scala/config/BotConfig.scala
 .env
 
 # Created by https://www.toptal.com/developers/gitignore/api/scala
