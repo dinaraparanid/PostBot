@@ -1,14 +1,34 @@
 package com.paranid5.tgpostbot
 package data.post
 
+import core.common.entities.post.{MessageEntity, PostWithEntities}
+import core.common.entities.user.User
+
 import cats.effect.IO
-import doobie.util.transactor
+
 import io.github.cdimascio.dotenv.Dotenv
 
-type IOTransactor = transactor.Transactor.Aux[IO, Unit]
+trait TgPostsRepository[R]:
+  def connect(dotenv: Dotenv): R
 
-trait TgPostsRepository[R, P: PostDataSource, U: UserDataSource]:
-  protected def postDataSource(transactor: IOTransactor): P
-  protected def userDataSource(transactor: IOTransactor): U
+  extension (repository: R)
+    def getPostsByUser(user: User): IO[List[PostWithEntities]]
 
-  def connect(dotenv: Dotenv): (R, IOTransactor)
+    def storePost(
+      user:     User,
+      date:     Int,
+      text:     String,
+      chatId:   Long,
+      entities: List[MessageEntity]
+    ): IO[Either[Throwable, Long]]
+
+    def updatePost(
+      id:          Long,
+      user:        User,
+      chatId:      Long,
+      newDate:     Int,
+      newText:     String,
+      newEntities: List[MessageEntity]
+    ): IO[Either[Throwable, Unit]]
+
+    def removePost(id: Long): IO[Either[Throwable, Unit]]

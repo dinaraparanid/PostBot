@@ -1,48 +1,46 @@
 package com.paranid5.tgpostbot
 package data.post
 
-import cats.effect.IO
+import core.common.entities.post.Post
 
-import com.pengrad.telegrambot.model.Message
+import cats.effect.IO
 
 import doobie.*
 import doobie.implicits.*
 import doobie.util.transactor
-import doobie.util.transactor.Transactor
-
-final class PostgresPostDataSource(
-  private val transactor: IOTransactor
-)
 
 object PostgresPostDataSource:
-  given postgresPostDataSource: PostDataSource[PostgresPostDataSource] with
-    extension (source: PostgresPostDataSource)
-      override def storePost(
-        userId:     Long,
-        date:       Int,
-        text:       String,
-      ): IO[Long] =
-        val query = sql"""
-                         INSERT INTO Post(user_id, date, text)
-                         VALUES ($userId, $date, $text)
-                         RETURNING ID;"""
-          .query[Long]
+  def posts: ConnectionIO[List[Post]] =
+    sql"SELECT * FROM Post".query[Post].to[List]
 
-        query.unique transact source.transactor
+  def getPostsByUser(userId: Long): ConnectionIO[List[Post]] =
+    sql"SELECT * FROM Post WHERE user_id = $userId".query[Post].to[List]
 
-      override def updatePost(
-        id:         Long,
-        newUserId:  Long,
-        newDate:    Int,
-        newText:    String,
-      ): IO[Unit] =
-        val query = sql"""
-                         UPDATE Post SET user_id = $newUserId, date = $newDate, text = $newText
-                         WHERE id = $id"""
-          .update
+  def storePost(
+    userId: Long,
+    date:   Int,
+    text:   String,
+    chatId: Long
+  ): ConnectionIO[Long] =
+    sql"""
+    INSERT INTO Post(user_id, date, text, chat_id)
+    VALUES ($userId, $date, $text, $chatId)
+    RETURNING id""".query[Long].unique
 
-        (query.run transact source.transactor).void
+  def updatePost(
+    id:        Long,
+    newUserId: Long,
+    newDate:   Int,
+    newText:   String,
+    newChatId: Long
+  ): ConnectionIO[Int] =
+    sql"""
+    UPDATE Post SET
+      user_id = $newUserId,
+      date = $newDate,
+      text = $newText,
+      chat_id = $newChatId
+    WHERE id = $id""".update.run
 
-      override def deletePost(id: Long): IO[Unit] =
-        val query = sql"DELETE FROM Post WHERE id = $id".update
-        (query.run transact source.transactor).void
+  def deletePost(id: Long): ConnectionIO[Int] =
+    sql"DELETE FROM Post WHERE id = $id".update.run

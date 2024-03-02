@@ -2,21 +2,18 @@ package com.paranid5.tgpostbot
 package bot
 
 import bot.commands.handleCommand
-import data.post.PostgresPostDataSource.given
 import data.post.PostgresTgPostsRepository.given
-import data.post.PostgresUserDataSource.given
-import data.post.{PostDataSource, TgPostsRepository, UserDataSource}
+import data.post.TgPostsRepository
 import data.user.user_state.RedisUserStateDataSource.redisUserDataSource
 import data.user.user_state.UserStateDataSource
 import utils.waitForEternity
 
 import cats.effect.IO
 import cats.effect.std.{Dispatcher, Queue}
+
 import com.pengrad.telegrambot.model.Message
 import com.pengrad.telegrambot.response.SendResponse
 import com.pengrad.telegrambot.{TelegramBot, UpdatesListener}
-
-import doobie.*
 
 import io.github.cdimascio.dotenv.Dotenv
 
@@ -26,12 +23,12 @@ def launchPostBot(token: String): IO[Unit] =
   val bot = TelegramBot(token)
 
   def impl(dotenv: Dotenv): IO[Unit] =
-    val (repository, transactor) = postgresTgPostRepository connect dotenv
+    val postRepository = postgresTgPostRepository connect dotenv
 
     for
       stateSource  ← redisUserDataSource.launch
       messageQueue ← launchMessageHandling(bot)
-      _            ← launchBotEventLoop(bot, messageQueue, stateSource, repository).start
+      _            ← launchBotEventLoop(bot, messageQueue, stateSource, postRepository).start
     yield ()
 
   launchDotenv(impl)
@@ -73,12 +70,12 @@ private def launchMessageHandling(bot: TelegramBot): IO[Queue[IO, Message]] =
     _            ← impl(messageQueue)
   yield messageQueue
 
-private def launchBotEventLoop[U: UserStateDataSource, R, P: PostDataSource, UP: UserDataSource](
+private def launchBotEventLoop[U: UserStateDataSource, R: TgPostsRepository](
   bot:             TelegramBot,
   messageQueue:    Queue[IO, Message],
   stateSource:     U,
   postsRepository: R
-)(using TgPostsRepository[R, P, UP]): IO[Unit] =
+): IO[Unit] =
   def impl: IO[SendResponse] =
     for
       message  ← messageQueue.take
