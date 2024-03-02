@@ -18,6 +18,7 @@ extension (message: Message)
     User(
       id = from.id,
       chatId = message.chatId,
-      firstName = from.firstName,
-      lastName = from.lastName
+      userName = from.username,
+      firstName = Option(from.firstName),
+      lastName = Option(from.lastName)
     )

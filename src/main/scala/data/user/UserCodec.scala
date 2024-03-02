@@ -16,11 +16,11 @@ object UserCodec:
     Decoder.forProduct1("value")(UserId.apply)
 
   given Encoder[User] =
-    Encoder.forProduct4("id", "chatId", "firstName", "lastName"): u ⇒
-      (u.id, u.chatId, u.firstName, u.lastName)
+    Encoder.forProduct5("id", "chatId", "userName", "firstName", "lastName"): u ⇒
+      (u.id, u.chatId, u.userName, u.firstName, u.lastName)
 
   given Decoder[User] =
-    Decoder.forProduct4("id", "chatId", "firstName", "lastName")(User.apply)
+    Decoder.forProduct5("id", "chatId",  "userName", "firstName", "lastName")(User.apply)
 
   given Encoder[UserState.None] =
     Encoder.forProduct2("None", "user"): s ⇒

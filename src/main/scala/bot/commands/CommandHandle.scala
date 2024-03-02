@@ -6,11 +6,11 @@ import bot.commands.start.*
 import bot.commands.store.*
 import bot.commands.unknown.onUnknownCommand
 import core.common.entities.user.UserState
+import data.post.{PostDataSource, TgPostsRepository, UserDataSource}
 import data.user.user_state.UserStateDataSource
 import utils.telegram.*
 
 import cats.effect.IO
-
 import com.pengrad.telegrambot.TelegramBot
 import com.pengrad.telegrambot.model.Message
 import com.pengrad.telegrambot.response.SendResponse
@@ -19,11 +19,12 @@ private val StartCommand = "/start"
 private val HelpCommand  = "/help"
 private val StoreCommand = "/store"
 
-def handleCommand[S: UserStateDataSource](
-  bot:         TelegramBot,
-  message:     Message,
-  stateSource: S
-): IO[SendResponse] =
+def handleCommand[U: UserStateDataSource, R](
+  bot:             TelegramBot,
+  message:         Message,
+  stateSource:     U,
+  postsRepository: R
+)(using TgPostsRepository[R, _, _]): IO[SendResponse] =
   def impl(userState: UserState) =
     (message.text(), userState) match
       case (StartCommand, _) ⇒
@@ -35,8 +36,8 @@ def handleCommand[S: UserStateDataSource](
       case (StoreCommand, _) ⇒
         onStoreCommand(bot, message, stateSource)
 
-      case (post, UserState.StoreSent(_)) ⇒
-        onStorePostCommand(post, bot, message, stateSource)
+      case (_, UserState.StoreSent(_)) ⇒
+        onStorePostCommand(message, bot, stateSource, postsRepository)
 
       case (command, _) ⇒
         onUnknownCommand(command, bot, message)

@@ -4,6 +4,7 @@ package core.common.entities.user
 case class User(
   id: Long,
   chatId: Long,
-  firstName: String,
-  lastName: String
+  userName: String,
+  firstName: Option[String],
+  lastName: Option[String]
 )

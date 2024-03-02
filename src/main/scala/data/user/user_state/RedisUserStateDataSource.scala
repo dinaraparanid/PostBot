@@ -27,7 +27,7 @@ final class RedisUserStateDataSource(
 )
 
 object RedisUserStateDataSource:
-  given redisDataSource: UserStateDataSource[RedisUserStateDataSource] with
+  given redisUserDataSource: UserStateDataSource[RedisUserStateDataSource] with
     override def launch: IO[RedisUserStateDataSource] =
       for
         requestQueue  ← Queue.unbounded[IO, Request]

@@ -5,6 +5,7 @@ import data.user.user_state.UserStateDataSource
 import utils.telegram.{botUser, chatId}
 
 import cats.effect.IO
+
 import com.pengrad.telegrambot.TelegramBot
 import com.pengrad.telegrambot.model.Message
 import com.pengrad.telegrambot.request.SendMessage
