@@ -5,10 +5,10 @@ import core.common.entities.post.{MessageEntity, PostWithEntities}
 import core.common.entities.user.User
 import utils.telegram.*
 
+import cats.Applicative
 import cats.effect.IO
 
 import com.pengrad.telegrambot.model.Message
-
 import io.github.cdimascio.dotenv.Dotenv
 
 trait TgPostsRepository[R]:
@@ -54,3 +54,5 @@ trait TgPostsRepository[R]:
       )
 
     def removePost(id: Long): IO[Either[Throwable, Unit]]
+
+    def removePostByText(text: String): IO[Either[Throwable, Unit]]
