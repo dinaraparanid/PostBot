@@ -6,5 +6,5 @@ import data.user.user_state.UserStateDataSource
 
 import cats.effect.IO
 
-def patchUserStartState[S: UserStateDataSource](user: User, src: S): IO[Unit] =
-  src.patchUserState(UserState.StartSent(user))
+private def patchUserStartState[S: UserStateDataSource](user: User, src: S): IO[Unit] =
+  src patchUserState UserState.StartSent(user)

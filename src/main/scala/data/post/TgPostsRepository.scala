@@ -17,6 +17,10 @@ trait TgPostsRepository[R]:
   extension (repository: R)
     def getPostsByUser(user: User): IO[List[PostWithEntities]]
 
+    def isPostExists(postId: Long): IO[Boolean]
+
+    def isPostBelongToUser(postId: Long, user: User): IO[Boolean]
+
     def storePost(
       user:     User,
       date:     Int,
@@ -53,6 +57,6 @@ trait TgPostsRepository[R]:
         newEntities = message.postEntities
       )
 
-    def removePost(id: Long): IO[Either[Throwable, Unit]]
+    def removePost(id: Long): IO[Either[Throwable, Long]]
 
     def removePostByText(text: String): IO[Either[Throwable, Unit]]

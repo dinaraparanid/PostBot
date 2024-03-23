@@ -13,23 +13,23 @@ import com.pengrad.telegrambot.request.SendMessage
 import com.pengrad.telegrambot.response.SendResponse
 
 def onStorePostCommand[U: UserStateDataSource, R: TgPostsRepository](
-  message:         Message,
   bot:             TelegramBot,
+  message:         Message,
   stateSource:     U,
   postsRepository: R
 ): IO[SendResponse] =
   for
     _   ← patchUserStorePostSentState(message.botUser, stateSource)
-    res ← storePostAndRespond(message, bot, postsRepository)
+    res ← storePostAndRespond(bot, message, postsRepository)
   yield res
 
 private def storePostAndRespond[R: TgPostsRepository](
-  message:         Message,
   bot:             TelegramBot,
+  message:         Message,
   postsRepository: R
 ): IO[SendResponse] =
   for res ← postsRepository storePost message
     yield res.fold(
-      fa = { e ⇒ bot execute SendMessage(message.chatId, e.getMessage) },
-      fb = { _ ⇒ bot execute SendMessage(message.chatId, postReceivedText) }
+      e  ⇒ bot execute SendMessage(message.chatId, e.getMessage),
+      id ⇒ bot execute SendMessage(message.chatId, postReceivedText(id))
     )

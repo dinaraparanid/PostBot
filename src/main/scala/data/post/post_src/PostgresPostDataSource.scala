@@ -17,6 +17,14 @@ object PostgresPostDataSource:
       override def postsByUser(userId: Long): ConnectionIO[List[Post]] =
         sql"""SELECT * FROM "Post" WHERE user_id = $userId""".query[Post].to[List]
 
+      override def isPostExists(postId: Long): ConnectionIO[Boolean] =
+        sql""" SELECT count(id) > 0 FROM "Post" WHERE id = $postId"""
+          .query[Boolean].unique
+
+      override def isPostBelongToUser(postId: Long, userId: Long): ConnectionIO[Boolean] =
+        sql"""SELECT count(id) > 0 FROM "Post" WHERE id = $postId AND user_id = $userId"""
+          .query[Boolean].unique
+
       override def storePost(
         userId: Long,
         date:   Int,
@@ -43,8 +51,8 @@ object PostgresPostDataSource:
           chat_id = $newChatId
         WHERE id = $id""".update.run.map(_ ⇒ ())
 
-      override def deletePost(id: Long): ConnectionIO[Unit] =
-        sql"""DELETE FROM "Post" WHERE id = $id""".update.run.map(_ ⇒ ())
+      override def deletePost(id: Long): ConnectionIO[Long] =
+        sql"""DELETE FROM "Post" WHERE id = $id""".update.run.map(_ ⇒ id)
 
       override def deletePostByText(text: String): ConnectionIO[Unit] =
         sql"""DELETE FROM "Post" WHERE text = $text""".update.run.map(_ ⇒ ())

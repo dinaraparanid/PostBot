@@ -2,6 +2,7 @@ package com.paranid5.tgpostbot
 package bot.commands
 
 import bot.commands.help.*
+import bot.commands.remove.*
 import bot.commands.start.*
 import bot.commands.store.*
 import bot.commands.unknown.onUnknownCommand
@@ -11,7 +12,6 @@ import data.user.user_state.UserStateDataSource
 import utils.telegram.*
 
 import cats.effect.IO
-
 import com.pengrad.telegrambot.TelegramBot
 import com.pengrad.telegrambot.model.Message
 import com.pengrad.telegrambot.response.SendResponse
@@ -19,6 +19,7 @@ import com.pengrad.telegrambot.response.SendResponse
 private val StartCommand = "/start"
 private val HelpCommand  = "/help"
 private val StoreCommand = "/store"
+private val RemoveCommand = "/remove"
 
 def handleCommand[U: UserStateDataSource, R: TgPostsRepository](
   bot:             TelegramBot,
@@ -38,7 +39,13 @@ def handleCommand[U: UserStateDataSource, R: TgPostsRepository](
         onStoreCommand(bot, message, stateSource)
 
       case (_, UserState.StoreSent(_)) ⇒
-        onStorePostCommand(message, bot, stateSource, postsRepository)
+        onStorePostCommand(bot, message, stateSource, postsRepository)
+
+      case (RemoveCommand, _) ⇒
+        onRemoveCommand(bot, message, stateSource)
+
+      case (_, UserState.RemoveSent(_)) ⇒
+        onRemoveByIdCommand(bot, message, stateSource, postsRepository)
 
       case (command, _) ⇒
         onUnknownCommand(command, bot, message)

@@ -1,8 +1,8 @@
 package com.paranid5.tgpostbot
 package bot.commands.store
 
-def requestPostText: String =
+private def requestPostText: String =
   "Provide a post text. You can either enter it yourself or forward the post to me"
 
-def postReceivedText: String =
-  "Post is successfully stored"
+private def postReceivedText(id: Long): String =
+  s"Post #$id is successfully stored"

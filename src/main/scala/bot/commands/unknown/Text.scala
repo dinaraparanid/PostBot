@@ -1,7 +1,7 @@
 package com.paranid5.tgpostbot
 package bot.commands.unknown
 
-def unknownText(command: String): String =
+private def unknownText(command: String): String =
   s"Unknown command ${overflowCommand(command)}"
 
 private def overflowCommand: String ⇒ String =

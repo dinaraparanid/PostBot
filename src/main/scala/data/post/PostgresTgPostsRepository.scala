@@ -57,6 +57,16 @@ object PostgresTgPostsRepository:
 
         impl transact repository.transactor
 
+      override def isPostExists(postId: Long): IO[Boolean] =
+        repository.postSource
+          .isPostExists(postId)
+          .transact(repository.transactor)
+
+      override def isPostBelongToUser(postId: Long, user: User): IO[Boolean] =
+        repository.postSource
+          .isPostBelongToUser(postId, user.id)
+          .transact(repository.transactor)
+
       override def storePost(
         user:     User,
         date:     Int,
@@ -120,7 +130,7 @@ object PostgresTgPostsRepository:
 
         impl transact repository.transactor
 
-      override def removePost(id: Long): IO[Either[Throwable, Unit]] =
+      override def removePost(id: Long): IO[Either[Throwable, Long]] =
         repository
           .postSource
           .deletePost(id)

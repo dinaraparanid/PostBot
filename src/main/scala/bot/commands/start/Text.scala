@@ -1,7 +1,7 @@
 package com.paranid5.tgpostbot
 package bot.commands.start
 
-def startCommandText: String =
+private def startCommandText: String =
   """Hello! I am Post Bot - bot that helps to store and order telegram post.
     |I can do the following:
     |

@@ -8,6 +8,10 @@ trait PostDataSource[F[_], A]:
     def posts: F[List[Post]]
 
     def postsByUser(userId: Long): F[List[Post]]
+    
+    def isPostExists(postId: Long): F[Boolean]
+
+    def isPostBelongToUser(postId: Long, userId: Long): F[Boolean]
 
     def storePost(
       userId: Long,
@@ -24,6 +28,6 @@ trait PostDataSource[F[_], A]:
       newChatId: Long
     ): F[Unit]
 
-    def deletePost(id: Long): F[Unit]
+    def deletePost(id: Long): F[Long]
 
     def deletePostByText(text: String): F[Unit]

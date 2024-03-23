@@ -62,6 +62,14 @@ object UserCodec:
     Decoder.forProduct2("RemoveSent", "user"): (_: String, u: User) ⇒
       UserState.RemoveSent(u)
 
+  given Encoder[UserState.RemoveIdSent] =
+    Encoder.forProduct2("RemoveIdSent", "user"): s ⇒
+      ("RemoveIdSent", s.user)
+
+  given Decoder[UserState.RemoveIdSent] =
+    Decoder.forProduct2("RemoveIdSent", "user"): (_: String, u: User) ⇒
+      UserState.RemoveIdSent(u)
+
   given Encoder[UserState.UpdateSent] =
     Encoder.forProduct2("UpdateSent", "user"): s ⇒
       ("UpdateSent", s.user)
@@ -80,13 +88,14 @@ object UserCodec:
 
   given Encoder[UserState] =
     Encoder.instance[UserState]:
-      case none          @ UserState.None(_)          ⇒ none.asJson
-      case startSent     @ UserState.StartSent(_)     ⇒ startSent.asJson
-      case storeSent     @ UserState.StoreSent(_)     ⇒ storeSent.asJson
+      case none          @ UserState.None         (_) ⇒ none.asJson
+      case startSent     @ UserState.StartSent    (_) ⇒ startSent.asJson
+      case storeSent     @ UserState.StoreSent    (_) ⇒ storeSent.asJson
       case storePostSent @ UserState.StorePostSent(_) ⇒ storePostSent.asJson
-      case removeSent    @ UserState.RemoveSent(_)    ⇒ removeSent.asJson
-      case updateSent    @ UserState.UpdateSent(_)    ⇒ updateSent.asJson
-      case helpSent      @ UserState.HelpSent(_)      ⇒ helpSent.asJson
+      case removeSent    @ UserState.RemoveSent   (_) ⇒ removeSent.asJson
+      case removeIdSent  @ UserState.RemoveIdSent (_) ⇒ removeIdSent.asJson
+      case updateSent    @ UserState.UpdateSent   (_) ⇒ updateSent.asJson
+      case helpSent      @ UserState.HelpSent     (_) ⇒ helpSent.asJson
 
   given Decoder[UserState] =
     List[Decoder[UserState]](
@@ -95,6 +104,7 @@ object UserCodec:
       Decoder[UserState.StoreSent].widen,
       Decoder[UserState.StorePostSent].widen,
       Decoder[UserState.RemoveSent].widen,
+      Decoder[UserState.RemoveIdSent].widen,
       Decoder[UserState.UpdateSent].widen,
       Decoder[UserState.HelpSent].widen
     ).reduceLeft(_ or _)
